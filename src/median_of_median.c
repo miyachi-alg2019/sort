@@ -14,22 +14,38 @@ void swap(int *p, int *q){
 }
 
 int quick_select(int A[], int n, int k){
-  int i, j, pivot;
+    int i, j, l, pivot, medians[(n+4)/5];
 
-// 真ん中の要素をピボットとする
-  pivot = A[n/2];
-  A[n/2] = A[0];
-  A[0] = pivot;
-  for(i = j = 1; i < n; i++){
+  if(n <= 5) {
+      i = 0;
+      while(++i<n) {
+	  if(A[i] < A[i-1]) {
+	      j = i;
+	      while(--j >= 0 && A[j] > A[j+1]) swap(A+j, A+j+1);
+	  }
+      }
+      return A[k];
+  }
+  
+  for(i=0; i<(n/5); i++) medians[i] = quick_select(A+i*5, 5, 2);
+  if(i*5 < n) medians[i] = quick_select(A+i*5, n%5, n%5/2);
+  pivot = quick_select(medians, (n+4)/5, (n+4)/10);
+
+  for(i=j=l=0; i<n; i++){
     if(A[i] <= pivot){
       swap(A+i, A+j);
+      if(A[i] == pivot) {
+	  swap(A+l, A+j);
+	  l++;
+      }
       j++;
     }
   }
 
   if(j == k+1) return pivot;
   else if(j < k+1) return quick_select(A+j, n-j, k-j);
-  else return quick_select(A+1, j-1, k);
+  else if(j-l-1 < k) return pivot;
+  else return quick_select(A+l, j-l, k);
 }
 
 
